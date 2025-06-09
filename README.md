@@ -6,7 +6,11 @@ The official repo: **Mel-McNet: A Mel-Scale Framework for Online Multichannel Sp
 Code and the pretrained model will be updated soon.
 
 ## Introduction
-This work proposes a Mel-scale framework for online multichannel speech enhancement, termed Mel-McNet. It proposes spectral and spatial information with two key components: an effective STFT-to-Mel module compressing multichannel STFT features into Mel-frequency representations, and a modified McNet backbone directly operating in the Mel domain to generate enhanced LogMel spectra. The spectra can be directly fed to vocoders for waveform reconstruction or ASR systems for transcription. Experiments on CHiME-3 show that Mel-McNet can reduce computational complexity by 60% while maintaining comparable enhancement and ASR performance to the original McNet. Mel-McNet also outperforms other SOTA methods, verifying the potentional of Mel-scale speech enhancement.
+This work proposes a Mel-scale framework for online multichannel speech enhancement, termed Mel-McNet. It proposes spectral and spatial information with two key components: an effective STFT-to-Mel module compressing multichannel STFT features into Mel-frequency representations, and a modified McNet backbone directly operating in the Mel domain to generate enhanced LogMel spectra. The spectra can be directly fed to vocoders for waveform reconstruction or ASR systems for transcription. Experiments on CHiME-3 show that Mel-McNet can reduce computational complexity by 60% while maintaining comparable enhancement and ASR performance to the original McNet. Mel-McNet also outperforms other SOTA methods, verifying the potential of Mel-scale speech enhancement.
+
+<div align="center">
+<img src="figures/framework.png" width="1000">
+</div>
 
 ## Performance
 
