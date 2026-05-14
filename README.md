@@ -3,7 +3,6 @@
 
 The official repo: **Mel-McNet: A Mel-Scale Framework for Online Multichannel Speech Enhancement** accepted by Interspeech 2025.
 
-Code and the pretrained model will be updated soon.
 
 ## Introduction
 This work proposes a Mel-scale framework for online multichannel speech enhancement, termed Mel-McNet. It proposes spectral and spatial information with two key components: an effective STFT-to-Mel module compressing multichannel STFT features into Mel-frequency representations, and a modified McNet backbone directly operating in the Mel domain to generate enhanced LogMel spectra. The spectra can be directly fed to vocoders for waveform reconstruction or ASR systems for transcription. Experiments on CHiME-3 show that Mel-McNet can reduce computational complexity by 60% while maintaining comparable enhancement and ASR performance to the original McNet. Mel-McNet also outperforms other SOTA methods, verifying the potential of Mel-scale speech enhancement.
@@ -22,6 +21,14 @@ Note:
 1) For Mel-McNet, the Param. and FLOPs of speech enhancement network/neural vocoder are given in addition;
 
 2) The overall real-time factor (RTF) of the proposed framework is approximately 0.799, with Mel-McNet and Vocos contributing 0.755 and 0.044, respectively. (Evaluated on a platform equipped with an Intel(R) Core(TM) i7-9700 CPU @ 3.00GHz.
+
+## Download Pretrained Model
+
+| Model | Link | 
+|---------|---------|
+| Mel-McNet | ~/logs/McNet_separation/checkpoints/epoch32_metric0.0202_final.ckpt|
+| Vocos-online | download from [huggingface](https://huggingface.co/EvanYYJ/Mel-McNet/resolve/main/vocos_checkpoint_epoch%3D520_step%3D704392_val_loss%3D3.6804.ckpt) | 
+| Ebranchformer | download from [huggingface](https://huggingface.co/EvanYYJ/Mel-McNet/resolve/main/valid.acc.ave_10best.pth)|
 
 ## Citation
 If you find our work helpful, please cite
