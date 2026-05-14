@@ -1,0 +1,53 @@
+data:
+  class_path: data_loaders.chime_using_dns_train.CHIMEUsingDNSDataModule
+  init_args:
+    dns_speech_dir: <YOUR_PATH_TO_DNS_CLEAN_SPEECH_DIR>
+    rir_dir: <YOUR_PATH_TO_RIR_DIR>
+    noise_dir:
+    - <YOUR_PATH_TO_TRAIN_NOISE_DIR>
+    - null
+    - null
+    - null
+    target_dir:
+    - null
+    - <YOUR_PATH_TO_VAL_CLEAN_DIR>
+    - <YOUR_PATH_TO_TEST_CLEAN_DIR>
+    - <YOUR_PATH_TO_TEST_CLEAN_DIR>
+    noisy_dir:
+    - null
+    - <YOUR_PATH_TO_VAL_NOISY_DIR>
+    - <YOUR_PATH_TO_TEST_NOISY_DIR>
+    - <YOUR_PATH_TO_TEST_NOISY_DIR>
+    target: null
+    datasets:
+    - train
+    - val
+    - test
+    - test
+    audio_time_len:
+    - 3.072
+    - 3.072
+    - null
+    - null
+    snr:
+    - -5.0
+    - 10.0
+    noise_type:
+    - real
+    training_num_uttrs: null
+    batch_size:
+    - 4
+    - 1
+    ref_channel_idx: 4
+    num_workers: 10
+    collate_func_train: data_loaders.utils.collate_func.default_collate_func
+    collate_func_val: data_loaders.utils.collate_func.default_collate_func
+    collate_func_test: data_loaders.utils.collate_func.default_collate_func
+    seeds:
+    - null
+    - 2
+    - 3
+    - 3
+    pin_memory: true
+    prefetch_factor: 5
+    persistent_workers: false

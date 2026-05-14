@@ -1,0 +1,22 @@
+# Core deep learning & audio
+torch==2.1.0+cu121
+torchaudio==2.1.0+cu121
+pytorch-lightning==2.0.8
+torchmetrics==1.7.4
+
+# Scientific computing & audio processing
+numpy==1.26.4
+scipy==1.11.3
+librosa==0.10.1
+soundfile==0.12.1
+
+# Metrics
+pesq==0.0.4
+onnxruntime-gpu==1.18.0
+
+# Data & config handling
+pandas==2.1.2
+jsonargparse==4.27.0
+packaging==24.2
+PyYAML==6.0.2
+Pillow==10.1.0
