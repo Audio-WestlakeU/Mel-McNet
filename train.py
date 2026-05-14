@@ -4,16 +4,16 @@ Mel-MCNet Training & Inference Entry Point
 
 Usage:
     # Training from scratch
-    python train.py fit --config configs/mel-mcnet-final.yaml
+    python train.py fit --config configs/dns_for_chime.yaml --config config/mel-mcnet.yaml
 
     # Resume training from checkpoint
-    python train.py fit --config configs/mel-mcnet-final.yaml --ckpt_path checkpoints/last.ckpt
+    python train.py fit --config logs/McNet_separation/version_X/config.yaml  --ckpt_path logs/McNet_separation/version_X/checkpoints/last.ckpt
 
     # Testing
-    python train.py test --config configs/mel-mcnet-final.yaml --ckpt_path checkpoints/your_checkpoint.ckpt
+    python train.py test --config configs/your_yaml.yaml --ckpt_path checkpoints/your_checkpoint.ckpt
 
     # Prediction / Inference
-    python train.py predict --config configs/mel-mcnet-final.yaml --ckpt_path checkpoints/your_checkpoint.ckpt
+    python train.py predict --config configs/your_yaml.yaml --ckpt_path checkpoints/your_checkpoint.ckpt
 """
 
 import os
