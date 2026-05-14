@@ -1,0 +1,304 @@
+# pytorch_lightning==2.0.8
+# Adapted from logs/McNet_separation/version_183/config.yaml
+# Updated for models.arch.mel_McNet_final.McNet_separation and models.SharedTrainer_mel_final.TrainModule
+# Key changes:
+#   - McNet_separation now directly contains all block parameters (block_1/2/3 merged into one class)
+#   - arch class_path changed from models.arch.mel_McNet to models.arch.mel_McNet_final
+#   - Removed block_1, block_2, block_3, num_used_block nesting
+#   - Removed unsupported TrainModule args: use_time_loss, use_inverse_norm_to_predict,
+#     use_mel_domain_norm (moved to arch), frozen_num_epoch, frozen_layer, use_asr_backend,
+#     asr_model_name, use_mic_generalization, use_log_loss
+seed_everything: 2
+trainer:
+  accelerator: gpu
+  strategy: ddp_find_unused_parameters_true
+  devices: 4
+  num_nodes: 1
+  precision: 32
+  logger: null
+  callbacks: null
+  fast_dev_run: false
+  max_epochs: 50
+  min_epochs: null
+  max_steps: -1
+  min_steps: null
+  max_time: null
+  limit_train_batches: null
+  limit_val_batches: null
+  limit_test_batches: null
+  limit_predict_batches: null
+  overfit_batches: 0.0
+  val_check_interval: null
+  check_val_every_n_epoch: 1
+  num_sanity_val_steps: null
+  log_every_n_steps: null
+  enable_checkpointing: null
+  enable_progress_bar: null
+  enable_model_summary: null
+  accumulate_grad_batches: 1
+  gradient_clip_val: 0.1
+  gradient_clip_algorithm: norm
+  deterministic: null
+  benchmark: null
+  inference_mode: true
+  use_distributed_sampler: true
+  profiler: null
+  detect_anomaly: false
+  barebones: false
+  plugins: null
+  sync_batchnorm: false
+  reload_dataloaders_every_n_epochs: 0
+  default_root_dir: null
+model:
+  arch:
+    class_path: models.arch.mel_McNet_final.McNet_separation
+    init_args:
+      # --- Feature extraction ---
+      amp_feature_extraction:
+        class_path: models.arch.mel_McNet_final.my_linear
+        init_args:
+          dim_input: 6
+          dim_output: 64
+          use_bias: true
+          use_BN: false
+          use_LN: true
+          activation: ReLU
+      phase_feature_extraction:
+        class_path: models.arch.mel_McNet_final.my_linear
+        init_args:
+          dim_input: 12
+          dim_output: 64
+          use_bias: true
+          use_BN: false
+          use_LN: true
+          activation: null
+      # --- STFT-to-mel projection (FSB + TSB) ---
+      stft2mel:
+        class_path: models.arch.mel_McNet_final.my_stft2mel
+        init_args:
+          n_mels: 80
+          n_embed: 64
+          n_freqs: 257
+          sample_rate: 16000
+          kernel_size: 3
+          stride: 1
+          padding: 1
+          activation_func:
+          - ReLU
+          - null
+          n_layers: 3
+          use_interation:
+          - true
+          - false
+          information_communication_type: attention_like
+          mel_scale: htk
+      # --- Sequence processing modules ---
+      freq:
+        class_path: models.arch.mel_McNet_final.RNN_FC
+        init_args:
+          input_size: 64
+          output_size: 64
+          hidden_size: 128
+          num_layers: 1
+          bidirectional: true
+          act_funcs:
+          - ''
+          - ReLU
+          use_FC: true
+          RNN_type: LSTM
+      narr:
+        class_path: models.arch.mel_McNet_final.RNN_FC
+        init_args:
+          input_size: 64
+          output_size: 64
+          hidden_size: 256
+          num_layers: 1
+          bidirectional: false
+          act_funcs:
+          - ''
+          - ReLU
+          use_FC: true
+          RNN_type: LSTM
+      sub:
+        class_path: models.arch.mel_McNet_final.RNN_FC
+        init_args:
+          input_size: 327
+          output_size: 64
+          hidden_size: 384
+          num_layers: 1
+          bidirectional: false
+          act_funcs:
+          - ''
+          - ReLU
+          use_FC: true
+          RNN_type: LSTM
+      full:
+        class_path: models.arch.mel_McNet_final.RNN_FC
+        init_args:
+          input_size: 70
+          output_size: 1
+          hidden_size: 128
+          num_layers: 1
+          bidirectional: true
+          act_funcs:
+          - ''
+          - Sigmoid
+          use_FC: true
+          RNN_type: LSTM
+      # --- Processing order and subband config ---
+      order:
+      - freq
+      - narr
+      - sub3+XrMag
+      - full4freq+XrMag
+      sub_freqs:
+      - 3
+      - 2
+      look_past_and_ahead:
+      - 5
+      - 0
+      ref_channel: 4
+      # --- Mel-domain config ---
+      use_mel: true
+      ref_chn_idx: 4
+      use_mel_domain_norm: false
+      mel_transfer_type: mel_energy
+  channels:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  ref_channel: 4
+  vocoder:
+    class_path: models.vocos.vocos_online.VOCOS_DECODE
+    init_args:
+      backbone:
+        class_path: models.vocos.vocos_online.VocosBackbone
+        init_args:
+          input_channels: 80
+          dim: 512
+          intermediate_dim: 1536
+          num_layers: 8
+          layer_scale_init_value: null
+          adanorm_num_embeddings: null
+      head:
+        class_path: models.vocos.vocos_online.ISTFTHead
+        init_args:
+          dim: 512
+          n_fft: 512
+          hop_length: 128
+          padding: center
+  vocoder_ckpt: vocos/vocos_checkpoint_epoch=520_step=704392_val_loss=3.6804.ckpt
+  stft:
+    class_path: models.io.stft.STFT
+    init_args:
+      n_fft: 512
+      n_hop: 128
+      win_len: null
+      win: hann_window
+  norm:
+    class_path: models.io.norm.Norm
+    init_args:
+      mode: cumulative_alpha
+  loss:
+    class_path: models.io.loss.Loss
+    init_args:
+      loss_func: models.io.loss.TF_domain_mse
+      pit: false
+      loss_func_kwargs: {}
+  optimizer:
+  - Adam
+  - lr: 0.001
+  lr_scheduler:
+  - ExponentialLR
+  - gamma: 1
+  metrics:
+  - SNR
+  - SDR
+  - SI_SDR
+  - NB_PESQ
+  - WB_PESQ
+  - eSTOI
+  - STOI
+  - DNSMOS
+  val_metric: loss
+  write_examples: 200
+  ensemble: null
+  compile: true
+  exp_name: exp
+  use_mel: true
+  mel_transfer_type: mel_energy
+  mel_transfer_eps: 1.0e-10
+  use_vocoder: true # True: to obtain the enhanced time-domain signal, False: to obtain the enhanced LogMel spectrogram (save as .npz)
+  use_non_log_predict_value: true
+  use_clip: true
+  use_mask: mrm
+model_checkpoint: 
+  dirpath: null
+  filename: epoch{epoch}_metric{val/metric:.4f}
+  monitor: val/metric
+  verbose: false
+  save_last: true
+  save_top_k: -1
+  save_weights_only: false
+  mode: min
+  auto_insert_metric_name: false
+  every_n_epochs: 1
+  enable_version_counter: true
+  save_last_n: 10
+ckpt_path: logs/McNet_separation/checkpoints/epoch32_metric0.0202_final.ckpt
+data:
+  class_path: data_loaders.chime_using_dns_train.CHIMEUsingDNSDataModule
+  init_args:
+    dns_speech_dir: /data/home/yangyujie/datasets/DNS_for_chime/clean_speech_dns_100h_final_multichannel
+    rir_dir: /data/home/yangyujie/project/NBSS_pmt/dataset/chime3_240703_rirs_generated
+    noise_dir:
+    - /data/home/yangyujie/datasets/simu-data/training_dataset/noise_segment_all
+    - null
+    - null
+    - null
+    target_dir:
+    - null
+    - /data/home/yangyujie/datasets/simu-data/validation_dataset/clean
+    - /data/home/yangyujie/datasets/simu-data/test_dataset/clean
+    - /data/home/yangyujie/datasets/simu-data/test_dataset/clean
+    noisy_dir:
+    - null
+    - /data/home/yangyujie/datasets/simu-data/validation_dataset/noisy
+    - /data/home/yangyujie/datasets/simu-data/test_dataset/noisy
+    - /data/home/yangyujie/datasets/simu-data/test_dataset/noisy
+    target: null
+    datasets:
+    - train
+    - val
+    - test
+    - test
+    audio_time_len:
+    - 3.072
+    - 3.072
+    - null
+    - null
+    snr:
+    - -5.0
+    - 10.0
+    noise_type:
+    - real
+    training_num_uttrs: null
+    batch_size:
+    - 4
+    - 1
+    ref_channel_idx: 4
+    num_workers: 10
+    collate_func_train: data_loaders.utils.collate_func.default_collate_func
+    collate_func_val: data_loaders.utils.collate_func.default_collate_func
+    collate_func_test: data_loaders.utils.collate_func.default_collate_func
+    seeds:
+    - null
+    - 2
+    - 3
+    - 3
+    pin_memory: true
+    prefetch_factor: 5
+    persistent_workers: false
